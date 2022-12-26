@@ -3,7 +3,7 @@ import json
 import random
 from pathlib import Path
 from pprint import pprint
-
+import os
 from tqdm import tqdm
 from transformers import AutoTokenizer
 
@@ -334,7 +334,21 @@ class Sampler:
         return hash_functions
 
 
-def create_synthetic_dataset(size: int, io_size=3) -> dict:
+def prompt_python_like_syntax(inp:str,out:str,code_ground_truth:str):
+    io_pair_syntax = f"""input : list = {inp}
+output : list = {out}"""
+    return io_pair_syntax,code_ground_truth
+
+def create_synthetic_dataset(size: int, io_size=3,prompt_style_flag="dsl") -> dict:
+    """
+    Creates synthetic dataset for list manipulation by mechanical traversal of the AST.
+    args:
+        size: number of samples to be generated
+        io_size: number of input-output pairs to be generated
+        prompt_style_flag: "dsl" or "py"
+    returns:
+        output_list: list of dictionaries containing input-output pairs
+    """
     output_list = []
     sampler = Sampler()
     for i in tqdm(range(size)):
@@ -343,17 +357,32 @@ def create_synthetic_dataset(size: int, io_size=3) -> dict:
             inp = sampled[0]["input"][0]
             out = sampled[-1]["output"]
             function = sampled[-1]["function_template"]
-            prompt_inp = f"Input: {inp} Output: {out} Function:"
-            prompt_out = function
-            if out != [] and out != "ERROR":
-                output_list.append(
-                    {
-                        "input": prompt_inp,
-                        "output": prompt_out,
-                        "io_inp": inp,
-                        "io_out": out,
-                    }
-                )
+            if prompt_style_flag == "dsl":
+                prompt_inp = f"Input: {inp} Output: {out} Function:"
+                prompt_out = function
+                if out != [] and out != "ERROR":
+                    output_list.append(
+                        {
+                            "input": prompt_inp,
+                            "output": prompt_out,
+                            "io_inp": inp,
+                            "io_out": out,
+                        }
+                    )
+            elif prompt_style_flag == "py":
+                prompt_inp,prompt_out = prompt_python_like_syntax(inp,out,function)
+                if out != [] and out != "ERROR":
+                    output_list.append(
+                        {
+                            "input": prompt_inp,
+                            "output": prompt_out,
+                            "io_inp": inp,
+                            "io_out": out,
+                        }
+                    )
+            else:
+                raise NotImplementedError(f"prompt_style_flag {prompt_style_flag} not implemented, use either 'dsl' or 'py'.")
+
         except:
             pass
 
@@ -382,14 +411,22 @@ def basic_stats(dataset, tokenizer):
     }
 
 
-if __name__ == "__main__":
-    # sampler = Sampler()
-    # pprint(sampler.sample_production())
-    # pprint(interpreter("div_n(reverse([-2, -5, -4]),1)"))
-    train_data = create_synthetic_dataset(2000000)
+def preprocess_main(dataset_length:int,output_path:str,prompt_style_flag:str="dsl"):
+    train_data = create_synthetic_dataset(dataset_length)
     test_data = create_synthetic_dataset(2_000)
     print(f"Train data size: {len(train_data)}")
     print(f"Test data size: {len(test_data)}")
-    Path("dataset").mkdir(parents=True, exist_ok=True)
-    write_to_json(train_data, "dataset/train.json")
-    write_to_json(test_data, "dataset/test.json")
+    Path(output_path).mkdir(parents=True, exist_ok=True)
+    write_to_json(train_data, os.path.join(output_path,"train.json"))
+    write_to_json(test_data, os.path.join(output_path,"test.json"))
+    print(f"Sucessfully written in {output_path}")
+
+
+if __name__ == "__main__":
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--dataset_length", type=int, default=100_000)
+    parser.add_argument("--output_path", type=str, default="data")
+    parser.add_argument("--prompt_style_flag", type=str, default="dsl")
+    args = parser.parse_args()
+    preprocess_main(args.dataset_length,args.output_path,args.prompt_style_flag)
