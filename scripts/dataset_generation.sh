@@ -1,0 +1,1 @@
+python3 -m src.lang --dataset_length 20_000 --output_path dataset/
