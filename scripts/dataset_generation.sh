@@ -1,1 +1,1 @@
-python3 -m src.lang --dataset_length 20_000 --output_path dataset/
+python3 -m src.lang --dataset_length 1_000_000 --output_path synt_dataset/ --prompt_style_flag "py"

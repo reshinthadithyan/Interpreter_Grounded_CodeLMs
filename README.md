@@ -30,10 +30,16 @@ sort_des([10,5,6]) -> [10,6,5]
 
 ```
 To generate training/testing data run, `python3 -m lang`. The dataset would be saved in `./dataset/train.json` and `./dataset/test.json`. To use the processed dataset refer to this [google drive link](https://drive.google.com/drive/folders/1093FlJA0MF7gh25yi4-__yU6Fj-onK1v?usp=share_link).
-Each datapoint in the dataset would look like,
+Each datapoint in the dataset would look like if the `prompt_style_flag` is set to `dsl`,
 ```json
     {"input": "Input: [4, -2, 0, 0, 5, 5] Output: [25, 25, 20, 0, 0, -10] Function:",
     "output": "sort_des(reverse(mul_n(sort_asc(sort_asc([4, -2, 0, 0, 5, 5])),5)))"}
+```
+if it is set to python, it would look like,
+```json
+    {"input": "input : list = [4, -2, 0, 0, 5, 5]\n output : list = [25, 25, 20, 0, 0, -10]",
+    "output": "generated_output : list = sort_des(reverse(mul_n(sort_asc(sort_asc([4, -2, 0, 0, 5, 5])),5)))"
+    "test": "assert generated_output == output"}
 ```
 ## Caveat on DSL design
 The DSL designed here is a very simple toy example with every function returning type `list`, ideally in a real world scenario even list manipulation DSLs would be more complex with different types like strings, etc.

@@ -330,14 +330,13 @@ class Sampler:
                 if generated_function["output"] == "ERROR":
                     break
                 hash_functions.append(generated_function)
-
         return hash_functions
 
 
 def prompt_python_like_syntax(inp:str,out:str,code_ground_truth:str):
     io_pair_syntax = f"""input : list = {inp}
 output : list = {out}"""
-    return io_pair_syntax,code_ground_truth
+    return io_pair_syntax, "generated_output : list = " + code_ground_truth
 
 def create_synthetic_dataset(size: int, io_size=3,prompt_style_flag="dsl") -> dict:
     """
@@ -367,6 +366,7 @@ def create_synthetic_dataset(size: int, io_size=3,prompt_style_flag="dsl") -> di
                             "output": prompt_out,
                             "io_inp": inp,
                             "io_out": out,
+                            "output_masked": prompt_out.replace(str(inp),"input")
                         }
                     )
             elif prompt_style_flag == "py":
@@ -378,6 +378,7 @@ def create_synthetic_dataset(size: int, io_size=3,prompt_style_flag="dsl") -> di
                             "output": prompt_out,
                             "io_inp": inp,
                             "io_out": out,
+                            "output_masked": prompt_out.replace(str(inp),"input")
                         }
                     )
             else:
@@ -412,8 +413,8 @@ def basic_stats(dataset, tokenizer):
 
 
 def preprocess_main(dataset_length:int,output_path:str,prompt_style_flag:str="dsl"):
-    train_data = create_synthetic_dataset(dataset_length)
-    test_data = create_synthetic_dataset(2_000)
+    train_data = create_synthetic_dataset(dataset_length,prompt_style_flag=prompt_style_flag)
+    test_data = create_synthetic_dataset(int(dataset_length*0.1),prompt_style_flag=prompt_style_flag)
     print(f"Train data size: {len(train_data)}")
     print(f"Test data size: {len(test_data)}")
     Path(output_path).mkdir(parents=True, exist_ok=True)
