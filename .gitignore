@@ -131,3 +131,4 @@ dmypy.json
 #CHANGE(reshinth)
 synth_dataset/
 model_dir/
+wandb/

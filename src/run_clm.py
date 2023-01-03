@@ -57,7 +57,7 @@ from transformers.utils.versions import require_version
 
 
 # Will error if the minimal version of Transformers is not installed. Remove at your own risks.
-check_min_version("4.26.0.dev0")
+#check_min_version("4.26.0.dev0")
 
 logger = get_logger(__name__)
 
@@ -350,13 +350,13 @@ def main():
     #
     # In distributed training, the .from_pretrained methods guarantee that only one local process can concurrently
     # download model & vocab.
-    if args.config_name:
-        config = AutoConfig.from_pretrained(args.config_name)
-    elif args.model_name_or_path:
-        config = AutoConfig.from_pretrained(args.model_name_or_path)
-    else:
-        config = CONFIG_MAPPING[args.model_type]()
-        logger.warning("You are instantiating a new config instance from scratch.")
+    # if args.config_name:
+    #     config = AutoConfig.from_pretrained(args.config_name)
+    # elif args.model_name_or_path:
+    #     config = AutoConfig.from_pretrained(args.model_name_or_path)
+    # else:
+    #     config = CONFIG_MAPPING[args.model_type]()
+    #     logger.warning("You are instantiating a new config instance from scratch.")
 
     if args.tokenizer_name:
         tokenizer = AutoTokenizer.from_pretrained(args.tokenizer_name, use_fast=not args.use_slow_tokenizer)
@@ -372,7 +372,7 @@ def main():
         model = AutoModelForCausalLM.from_pretrained(
             args.model_name_or_path,
             from_tf=bool(".ckpt" in args.model_name_or_path),
-            config=config,
+            #config=config,
         )
     else:
         logger.info("Training new model from scratch")
