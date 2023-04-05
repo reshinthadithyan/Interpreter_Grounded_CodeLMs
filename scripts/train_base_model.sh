@@ -4,4 +4,4 @@ accelerate launch src/run_clm.py \
     --output_dir model_dir/base_model/codegen-350m-1M-synt \
     --report_to wandb \
     --with_tracking \
-    --block_size 256 \
+    --block_size 1024

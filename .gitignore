@@ -132,3 +132,5 @@ dmypy.json
 synth_dataset/
 model_dir/
 wandb/
+cache/
+dataset/
